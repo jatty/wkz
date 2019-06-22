@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+# OpenData Kfz-Zulassung Stadt Nürnberg - freie KFZ-Wunschkennzeichen
+
+import requests
+from bs4 import BeautifulSoup
+import re
+
+url = "https://online-service2.nuernberg.de/wkz/"
+
+bst = 'NN'
+zhl = '???'
+
+s = requests.Session() # Session = connection keep alive + store session cookies
+
+r = s.get(url) #print (browser.get_current_page())
+p = BeautifulSoup(r.text, "html.parser") # or 'lxml'
+pp = p.find('form', attrs={'id':'contextForm'}).get('action')
+#<button name="ACTION_INFOPAGE_NEXT" type="submit" class="footerButton" title="">Weiter</button>
+r = s.post(url + pp, data = {
+        'ACTION_INFOPAGE_NEXT': '',
+        'PGUTSMSC': p.find('input', attrs={'name':'PGUTSMSC'}).get('value')
+    })
+p = BeautifulSoup(r.text, "html.parser") # or 'lxml'
+pp = p.find('form', attrs={'id':'contextForm'}).get('action')
+r = s.post(url + pp,
+    data = {
+        # service/page works unless more 'form' structures are on the page
+        'PGUTSMSC': p.find('input', attrs={'name':'PGUTSMSC'}).get('value'),
+        'WKZSEARCH_CHARS': bst,
+        'WKZSEARCH_NUMS': zhl,
+        'WKZSEARCH_SPECIALNUMS': '1',
+        'ACTION_SEARCHPAGE_NEXT': ''
+    })
+p = BeautifulSoup(r.text, "html.parser") # or 'lxml'
+
+# <option value="N-NN135">N - NN 135</option>
+print (bst + ":", end='')
+for link in p.find_all('option'):
+        h = link.get('value')
+        myplate  = re.sub("^([A-Z-]+)", "", h)
+        print (" " + myplate, end='')
+print ()
