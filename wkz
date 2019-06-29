@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# OpenData Kfz-Zulassung Stadt Nürnberg - freie KFZ-Wunschkennzeichen
+# OpenData Kfz-Zulassung Stadt Nürnberg - freie Kfz-Wunschkennzeichen
 
 import requests
 from bs4 import BeautifulSoup
@@ -7,17 +7,24 @@ import re
 
 url = "https://online-service2.nuernberg.de/wkz/"
 
-# zwei Buchstaben von AA-ZZ, ggf. mit Fragezeichen, z. B. N? oder ??
+# In Nürnberg (Kfz-Kennzeichen N) gibt es folgende Möglichkeiten:
+# N-? ???? (1 Buchstabe, 4 Ziffern)
+# N-?? ??? (2 Buchstaben, 3 Ziffern)
+# N-?? ???? (2 Buchstaben, 4 Ziffern)
+
+# 1 bzw. 2 Buchstaben von AA-ZZ, ggf. mit Fragezeichen, z. B. N? oder ?? oder *
 bst = 'NN'
-# drei oder vier Ziffern, ggf. mit Fragezeichen, z. B. 7?? oder 2???
+
+# 3 bzw. 4 Ziffern, ggf. mit Fragezeichen, z. B. 7?? oder 2??? oder *
 zhl = '???'
+
 # Achtung, Exklusivität: wenn man 1 wählt, ist 2/3/4/5/6 nicht inkludiert!!!
-# 1 normaler Match
-# 2 Schnapszahlen
-# 3 Aufsteigend
-# 4 Absteigend
-# 5 Symmetrisch
-# 6 Glatte Zahlen
+# 1 sonstige Zahlen (314, 389 etc.)
+# 2 Schnapszahlen (111, 222 bzw. 1111, 2222 etc.)
+# 3 aufsteigend (123, 1234 etc.)
+# 4 absteigend (321, 4321 etc.)
+# 5 symmetrisch (121, 212 etc.)
+# 6 glatte Zahlen (100, 4000 etc.)
 spc = '2'
 
 s = requests.Session() # Session = connection keep alive + store session cookies
