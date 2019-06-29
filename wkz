@@ -7,8 +7,18 @@ import re
 
 url = "https://online-service2.nuernberg.de/wkz/"
 
+# zwei Buchstaben von AA-ZZ, ggf. mit Fragezeichen, z. B. N? oder ??
 bst = 'NN'
+# drei oder vier Ziffern, ggf. mit Fragezeichen, z. B. 7?? oder 2???
 zhl = '???'
+# Achtung, Exklusivität: wenn man 1 wählt, ist 2/3/4/5/6 nicht inkludiert!!!
+# 1 normaler Match
+# 2 Schnapszahlen
+# 3 Aufsteigend
+# 4 Absteigend
+# 5 Symmetrisch
+# 6 Glatte Zahlen
+spc = '2'
 
 s = requests.Session() # Session = connection keep alive + store session cookies
 
@@ -28,15 +38,19 @@ r = s.post(url + pp,
         'PGUTSMSC': p.find('input', attrs={'name':'PGUTSMSC'}).get('value'),
         'WKZSEARCH_CHARS': bst,
         'WKZSEARCH_NUMS': zhl,
-        'WKZSEARCH_SPECIALNUMS': '1',
+        'WKZSEARCH_SPECIALNUMS': spc,
         'ACTION_SEARCHPAGE_NEXT': ''
     })
 p = BeautifulSoup(r.text, "html.parser") # or 'lxml'
 
 # <option value="N-NN135">N - NN 135</option>
+#print (p.find_all('option'))
 print (bst + ":", end='')
 for link in p.find_all('option'):
-        h = link.get('value')
-        myplate  = re.sub("^([A-Z-]+)", "", h)
-        print (" " + myplate, end='')
+        t = link.get_text()
+        myplatetext  = re.sub("^([A-Z- ]+)", "", t)
+        v = link.get('value')
+        myplate  = re.sub("^([A-Z-]+)", "", v)
+        if myplate == myplatetext:
+        	print (" " + myplate, end='')
 print ()
